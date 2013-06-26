@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/CouchReader/CouchReader.iml" filepath="$PROJECT_DIR$/CouchReader/CouchReader.iml" />
+      <module fileurl="file://$PROJECT_DIR$/CouchReaderProject.iml" filepath="$PROJECT_DIR$/CouchReaderProject.iml" />
+    </modules>
+  </component>
+</project>
+

@@ -1,0 +1,34 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.4.2'
+    }
+}
+apply plugin: 'android'
+
+repositories {
+    mavenCentral()
+    maven {
+        url "http://maven.hq.couchbase.com/nexus/content/repositories/releases/"
+    }
+}
+
+dependencies {
+    compile 'com.android.support:support-v4:13.0.0'
+    compile fileTree(dir: 'libs', include: 'td_collator_so.jar')  // hack to add .so objects (bit.ly/17pUlJ1)
+    compile 'com.couchbase.cblite:CBLite:0.7'
+    compile 'com.couchbase.cblite:CBLiteEktorp:0.7.2'   // 7.2+ required, see https://github.com/couchbaselabs/TouchDB-Android/issues/71
+    compile 'com.google.code.gson:gson:2.2.4'
+}
+
+android {
+    compileSdkVersion 17
+    buildToolsVersion "17.0.0"
+
+    defaultConfig {
+        minSdkVersion 7
+        targetSdkVersion 16
+    }
+}
