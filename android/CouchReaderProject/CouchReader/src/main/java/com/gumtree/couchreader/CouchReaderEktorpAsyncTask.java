@@ -9,7 +9,7 @@ public abstract class CouchReaderEktorpAsyncTask extends EktorpAsyncTask {
 
     @Override
     protected void onDbAccessException(DbAccessException dbAccessException) {
-        Log.e(MainActivity.TAG, "DbAccessException in background", dbAccessException);
+        Log.e(FeedListActivity.TAG, "DbAccessException in background", dbAccessException);
     }
 
 }
