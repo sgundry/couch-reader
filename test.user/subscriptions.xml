@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opml version="1.0">
+    <head>
+        <title>test user subscriptions in Google Reader</title>
+    </head>
+    <body>
+    <outline text="Steve Vinoski's Blog"
+        title="Steve Vinoski's Blog" type="rss"
+        xmlUrl="http://steve.vinoski.net/blog/feed/atom/" htmlUrl="http://steve.vinoski.net/blog"/>
+    <outline text="Labnotes" 
+        title="Labnotes" type="rss" 
+        xmlUrl="http://labnotes.org/feed/atom/" htmlUrl="http://labnotes.org/"/>
+    </body>
+</opml>
