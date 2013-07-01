@@ -22,13 +22,4 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
     />
 
-    <TextView
-            android:id="@+id/num_unread"
-            android:text="#Unread"
-            android:paddingRight="10dip"
-            android:layout_gravity="right"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-    />
  </LinearLayout>

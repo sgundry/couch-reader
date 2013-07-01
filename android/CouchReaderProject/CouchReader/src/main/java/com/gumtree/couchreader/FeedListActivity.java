@@ -1,12 +1,9 @@
 package com.gumtree.couchreader;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
-import com.gumtree.couchreader.CouchContext;
 
 import android.app.ListActivity;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -27,7 +24,6 @@ import com.couchbase.cblite.CBLViewMapEmitBlock;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.ViewQuery;
 import org.ektorp.ViewResult;
@@ -35,77 +31,22 @@ import org.ektorp.android.util.CouchbaseViewListAdapter;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
-class Doc {
-
-    public static String getValue(JsonNode json, String key) {
-        return getStringValue(json, key);
-    }
-
-    public static String getValue(JsonNode json, String key, String defaultValue) {
-        return getStringValue(json, key, defaultValue);
-    }
-
-    public static String getStringValue(JsonNode json, String key) {
-        return getStringValue(json, key, "");
-    }
-
-    public static String getStringValue(JsonNode json, String key, String defaultValue) {
-        JsonNode item = json.get(key);
-        if(item != null) {
-            return item.getTextValue();
-        }
-        else {
-            return defaultValue;
-        }
-    }
-
-    public static int getIntValue(JsonNode json, String key){
-        return getIntValue(json, key, 0);
-    }
-
-    public static int getIntValue(JsonNode json, String key, int defaultValue) {
-        JsonNode item = json.get(key);
-        if(item != null) {
-            return item.getIntValue();
-        }
-        else {
-            return defaultValue;
-        }
-    }
-
-    public static boolean getBooleanValue(JsonNode json, String key) {
-        return getBooleanValue(json, key, false);
-    }
-
-    public static boolean getBooleanValue(JsonNode json, String key, boolean defaultValue) {
-        JsonNode item = json.get(key);
-        if(item != null) {
-            return item.getBooleanValue();
-        }
-        else {
-            return defaultValue;
-        }
-    }
-};
-
 class Feed {
-    public int id;
+    public String id;
     public String title;
     public int num_unread = 0;
     public boolean is_folder = false;
 
-    public Feed(String title, int num_unread, boolean is_folder)
-    {
+    public Feed(String title, int num_unread, boolean is_folder)     {
         this.title = title;
         this.num_unread = num_unread;
         this.is_folder = is_folder;
     }
 
     public Feed(JsonNode doc) {
+        this.id         = Doc.getStringValue(doc, "_id", "");
         this.title      = Doc.getStringValue(doc, "title", "");
         this.num_unread = Doc.getIntValue(doc, "num_unread", 0);
         this.is_folder  = Doc.getStringValue(doc, "type").equals("folder");
@@ -147,9 +88,9 @@ class FeedListAdapter extends CouchbaseViewListAdapter {
             v = vi.inflate(R.layout.list_item_feed, null);
             ViewHolder vh  = new ViewHolder();
 
-            vh.feed_icon        = (ImageView) v.findViewById(R.id.feed_icon);
-            vh.feed_title       = (TextView)  v.findViewById(R.id.feed_title);
-            vh.feed_num_unread  = (TextView)  v.findViewById(R.id.feed_num_unread);
+            vh.feed_icon        = (ImageView) v.findViewById(R.id.icon);
+            vh.feed_title       = (TextView)  v.findViewById(R.id.title);
+            vh.feed_num_unread  = (TextView)  v.findViewById(R.id.num_unread);
 
             v.setTag(vh);
         }
@@ -175,13 +116,18 @@ public class FeedListActivity extends ListActivity {
     private static final String     byIdViewName        = "by_id_brg3";
     private static final String     byFolderViewName    = "by_folder3";
 
+    public static final String      FOLDER_MESSAGE      = "com.gumtree.couchreader.FOLDER";
+
     private CouchContext            couchContext        = null;
     private String                  folderName          = "/";
+
+    private static boolean          viewsInitialised    = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_feeds);
+
+        Log.d(TAG, "onCreate()");
 
         CouchReaderApp app = ((CouchReaderApp)getApplicationContext());
         assert(app != null);
@@ -189,18 +135,21 @@ public class FeedListActivity extends ListActivity {
         couchContext = app.getCouchContext();
         assert(couchContext != null && couchContext.isConnected());
 
-        /// hack for now for installing views just once
-        if(savedInstanceState == null) {
-            installViews();
-        }
-        else {
-            folderName = savedInstanceState.getString("Folder", "/");
+        Intent intent = getIntent();
+        if(intent.hasExtra(FOLDER_MESSAGE)) {
+            folderName = intent.getStringExtra(FOLDER_MESSAGE);
         }
 
         Log.d(TAG, "onCreate: folderName=" + folderName);
 
-        // can only call this once isConnected()
+        //if(!viewsInitialised) {
+            installViews();
+        //    viewsInitialised = true;
+        //}
+
         initListAdapters();
+
+        setContentView(R.layout.activity_feeds);
     }
 
     @Override
@@ -219,12 +168,16 @@ public class FeedListActivity extends ListActivity {
         Log.d(TAG,  String.format("Feed clicked: title=%s folder=%b", feed.title, feed.isFolder()));
 
         if(feed.isFolder()) {
-            Intent intent = new Intent(FeedListActivity.this, FeedListActivity.class);
-            intent.putExtra("Folder", feed.title);
+            // start new feeds list activity corresponding to this folder
+            Intent intent = new Intent(this, FeedListActivity.class);
+            intent.putExtra(FOLDER_MESSAGE, feed.title);
             startActivity(intent);
         }
         else {
             // start EntryListActivity corresponding to this feed
+            Intent intent = new Intent(this, EntryListActivity.class);
+            intent.putExtra(EntryListActivity.FEED_ID_MESSAGE, feed.id);
+            startActivity(intent);
         }
     }
 
